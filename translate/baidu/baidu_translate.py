@@ -12,9 +12,8 @@ from translate.translator import Translator
 class BaiduTranslator(Translator):
     def __init__(self) -> None:
         super().__init__()
-        endpoint = "http://api.fanyi.baidu.com"
         path = "/api/trans/vip/translate"
-        self.url = endpoint + path
+        self.url = f"http://api.fanyi.baidu.com{path}"
         self.appid = conf().get("baidu_translate_app_id")
         self.appkey = conf().get("baidu_translate_app_key")
 
@@ -31,16 +30,13 @@ class BaiduTranslator(Translator):
         while retry_cnt:
             r = requests.post(self.url, params=payload, headers=headers)
             result = r.json()
-            if errcode := result.get("error_code", "52000") != "52000":
-                if errcode == "52001" or errcode == "52002":
-                    retry_cnt -= 1
-                    continue
-                else:
-                    raise Exception(result["error_msg"])
-            else:
+            if not (errcode := result.get("error_code", "52000") != "52000"):
                 break
-        text = "\n".join([item["dst"] for item in result["trans_result"]])
-        return text
+            if errcode in {"52001", "52002"}:
+                retry_cnt -= 1
+            else:
+                raise Exception(result["error_msg"])
+        return "\n".join([item["dst"] for item in result["trans_result"]])
 
     def make_md5(self, s, encoding="utf-8"):
         return md5(s.encode(encoding)).hexdigest()

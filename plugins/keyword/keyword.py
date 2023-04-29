@@ -37,7 +37,7 @@ class Keyword(Plugin):
             # 加载关键词
             self.keyword = conf["keyword"]
 
-            logger.info("[keyword] {}".format(self.keyword))
+            logger.info(f"[keyword] {self.keyword}")
             self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
             logger.info("[keyword] inited.")
         except Exception as e:
@@ -49,7 +49,7 @@ class Keyword(Plugin):
             return
 
         content = e_context["context"].content.strip()
-        logger.debug("[keyword] on_handle_context. content: %s" % content)
+        logger.debug(f"[keyword] on_handle_context. content: {content}")
         if content in self.keyword:
             logger.debug(f"[keyword] 匹配到关键字【{content}】")
             reply_text = self.keyword[content]
@@ -61,5 +61,4 @@ class Keyword(Plugin):
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
 
     def get_help_text(self, **kwargs):
-        help_text = "关键词过滤"
-        return help_text
+        return "关键词过滤"
